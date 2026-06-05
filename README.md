@@ -11,11 +11,15 @@ Die Seite ist über Port **8080** erreichbar. HTML-Dateien und Logs liegen als V
 
 ### Struktur
 ```
-miniprojekt/
-├── Dockerfile
-├── html/
-│   └── index.html
-└── logs/
+m169-miniprojekt/
+├── README.md
+├── aufgabe1-webserver/
+│   ├── Dockerfile
+│   ├── html/
+│   │   └── index.html
+│   └── logs/          ← leer, aber .gitkeep rein damit Git den Ordner trackt
+└── aufgabe2-wordpress/
+    └── docker-compose.yml
 ```
 
 ### Befehle
