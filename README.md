@@ -11,15 +11,11 @@ Die Seite ist über Port **8080** erreichbar. HTML-Dateien und Logs liegen als V
 
 ### Struktur
 ```
-m169-miniprojekt/
-├── README.md
-├── aufgabe1-webserver/
-│   ├── Dockerfile
-│   ├── html/
-│   │   └── index.html
-│   └── logs/          ← leer, aber .gitkeep rein damit Git den Ordner trackt
-└── aufgabe2-wordpress/
-    └── docker-compose.yml
+aufgabe1-webserver/
+├── Dockerfile
+├── html/
+│   └── index.html
+└── logs/
 ```
 
 ### Befehle
@@ -29,7 +25,7 @@ m169-miniprojekt/
 docker build -t las-webserver .
 ```
 
-**Container starten (mit Volumes für HTML & Logs):**
+**Container starten:**
 ```bash
 docker run -d \
   -p 8080:80 \
@@ -39,48 +35,50 @@ docker run -d \
   las-webserver
 ```
 
-**Webseite aufrufen:** → http://localhost:8080
+**Webseite aufrufen:** → `http://<AWS-IP>:8080`
 
 ---
 
-## Aufgabe 2 — WordPress mit Docker Compose
+## Aufgabe 2 — WordPress mit Docker
 
 ### Beschreibung
-WordPress + MySQL als Multi-Container-Stack via `docker-compose.yml`.
+WordPress + MySQL als zwei separate Docker Container, verbunden über ein eigenes Docker Netzwerk.
 
 ### Struktur
 ```
-wordpress/
-└── docker-compose.yml
+aufgabe2-wordpress/
+└── README.md
 ```
 
 ### Befehle
 
-**Stack starten:**
+**Netzwerk erstellen:**
 ```bash
-docker compose up -d
+docker network create wp-network
 ```
 
-**Stack stoppen:**
+**MySQL Container starten:**
 ```bash
-docker compose down
+docker run -d --name wp-db --network wp-network \
+  -e MYSQL_ROOT_PASSWORD=rootpass \
+  -e MYSQL_DATABASE=wordpress \
+  -e MYSQL_USER=wpuser \
+  -e MYSQL_PASSWORD=wppass \
+  mysql:8.0
 ```
 
-**WordPress aufrufen:** → http://localhost:8080
+**WordPress Container starten:**
+```bash
+docker run -d --name wp-app --network wp-network \
+  -p 80:80 \
+  -e WORDPRESS_DB_HOST=wp-db:3306 \
+  -e WORDPRESS_DB_NAME=wordpress \
+  -e WORDPRESS_DB_USER=wpuser \
+  -e WORDPRESS_DB_PASSWORD=wppass \
+  wordpress:latest
+```
 
-### Erklärung docker-compose.yml
-| Zeile / Key | Bedeutung |
-|---|---|
-| `version: "3.9"` | Compose-Datei-Format-Version |
-| `services:` | Liste aller Container im Stack |
-| `db:` | MySQL-Datenbank-Container |
-| `wordpress:` | WordPress-Applikations-Container |
-| `image:` | Welches Docker-Image verwendet wird |
-| `restart: always` | Container startet automatisch neu bei Absturz |
-| `depends_on:` | Startreihenfolge — WordPress wartet auf DB |
-| `ports:` | Port-Mapping Host:Container |
-| `environment:` | Umgebungsvariablen (Zugangsdaten, DB-Name) |
-| `volumes:` | Persistente Datenspeicher (Daten bleiben nach Neustart) |
+**WordPress aufrufen:** → `http://<AWS-IP>`
 
 ---
 
