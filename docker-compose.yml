@@ -1,0 +1,39 @@
+# ===== WordPress Docker Compose | M169 | LAS =====
+# Startet WordPress + MySQL als Container-Stack
+
+version: "3.9"
+
+services:
+
+  # ── Datenbank ──────────────────────────────────────
+  db:
+    image: mysql:8.0              # Offizielles MySQL 8.0 Image
+    restart: always               # Container startet bei Absturz automatisch neu
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass   # Root-Passwort für MySQL
+      MYSQL_DATABASE: wordpress       # Name der Datenbank, die WordPress nutzt
+      MYSQL_USER: wpuser              # Datenbank-Benutzer
+      MYSQL_PASSWORD: wppass          # Passwort des Datenbank-Benutzers
+    volumes:
+      - db_data:/var/lib/mysql        # DB-Daten bleiben erhalten (named volume)
+
+  # ── WordPress ──────────────────────────────────────
+  wordpress:
+    image: wordpress:latest       # Offizielles WordPress Image (neueste Version)
+    restart: always
+    depends_on:
+      - db                        # WordPress startet erst, wenn db läuft
+    ports:
+      - "8080:80"                 # Aufruf über http://localhost:8080
+    environment:
+      WORDPRESS_DB_HOST: db:3306          # Hostname des DB-Containers + Port
+      WORDPRESS_DB_NAME: wordpress        # Muss mit MYSQL_DATABASE übereinstimmen
+      WORDPRESS_DB_USER: wpuser           # Muss mit MYSQL_USER übereinstimmen
+      WORDPRESS_DB_PASSWORD: wppass       # Muss mit MYSQL_PASSWORD übereinstimmen
+    volumes:
+      - wp_data:/var/www/html     # WordPress-Dateien bleiben erhalten
+
+# ── Volumes (persistente Datenspeicher) ────────────
+volumes:
+  db_data:    # Speichert MySQL-Datenbankdaten
+  wp_data:    # Speichert WordPress-Dateien (Themes, Plugins, Uploads)
