@@ -24,7 +24,7 @@ services:
     depends_on:
       - db                        # WordPress startet erst, wenn db läuft
     ports:
-      - "8080:80"                 # Aufruf über http://localhost:8080
+      - "8081:80"                 # Aufruf über http://localhost:8081
     environment:
       WORDPRESS_DB_HOST: db:3306          # Hostname des DB-Containers + Port
       WORDPRESS_DB_NAME: wordpress        # Muss mit MYSQL_DATABASE übereinstimmen
